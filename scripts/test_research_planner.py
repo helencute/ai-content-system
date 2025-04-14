@@ -3,10 +3,28 @@
 import os
 import sys
 import argparse
-from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
+# Manual environment variable loader - no dependencies needed
+def load_env_file(env_path='.env'):
+    """Load environment variables from a .env file"""
+    try:
+        with open(env_path) as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith('#'):
+                    continue
+                try:
+                    key, value = line.split('=', 1)
+                    os.environ[key.strip()] = value.strip().strip('"').strip("'")
+                    print(f"Loaded env var: {key.strip()}")
+                except ValueError:
+                    print(f"Skipping invalid line: {line}")
+        print("Environment variables loaded successfully")
+    except FileNotFoundError:
+        print(f"Warning: {env_path} file not found")
+
+# Load environment variables
+load_env_file()
 
 # Add parent directory to path to allow imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

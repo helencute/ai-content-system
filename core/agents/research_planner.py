@@ -8,7 +8,6 @@ from langchain_core.language_models.base import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import PydanticOutputParser
-from langchain_community.llms import HuggingFacePipeline, LlamaCpp
 
 # Import config utils
 from infrastructure.config_loader import ConfigLoader
@@ -93,30 +92,43 @@ class LlamaCppProvider(LLMProvider):
 
 
 class LLMFactory:
-    """Factory for creating LLM instances."""
+    """Factory class for creating LLM instances based on provider name."""
     
-    _providers = {
-        "openai": OpenAIProvider(),
-        "huggingface": HuggingFaceProvider(),
-        "llamacpp": LlamaCppProvider()
-    }
-    
-    @classmethod
-    def register_provider(cls, name: str, provider: LLMProvider) -> None:
-        """Register a new LLM provider."""
-        cls._providers[name] = provider
-    
-    @classmethod
-    def create_llm(cls, provider_name: str = None, **kwargs) -> BaseLanguageModel:
-        """Create an LLM instance from the specified provider."""
-        if provider_name is None:
-            provider_name = os.getenv("LLM_PROVIDER", "openai")
+    @staticmethod
+    def create_llm(provider_name: str, **kwargs) -> BaseLanguageModel:
+        """
+        Create an LLM instance based on provider name.
         
-        provider = cls._providers.get(provider_name)
-        if not provider:
-            raise ValueError(f"Unknown LLM provider: {provider_name}")
-        
-        return provider.get_llm(**kwargs)
+        Args:
+            provider_name: Name of the LLM provider
+            **kwargs: Additional parameters for the LLM
+            
+        Returns:
+            An instance of BaseLanguageModel
+        """
+        if provider_name == "openai":
+            # OpenAI is explicitly imported at the top level
+            return ChatOpenAI(**kwargs)
+        elif provider_name == "huggingface":
+            try:
+                from langchain_community.llms import HuggingFacePipeline
+                return HuggingFacePipeline(**kwargs)
+            except ImportError as e:
+                logging.error(f"HuggingFace import error: {e}")
+                logging.error("Falling back to OpenAI")
+                return ChatOpenAI(**kwargs)
+        elif provider_name == "llamacpp":
+            try:
+                # Direct import to avoid langchain_community.__init__ issues
+                from langchain_community.llms.llamacpp import LlamaCpp
+                return LlamaCpp(**kwargs)
+            except ImportError as e:
+                logging.error(f"LlamaCpp import error: {e}")
+                logging.error("Falling back to OpenAI")
+                return ChatOpenAI(**kwargs)
+        else:
+            logging.warning(f"Unknown provider '{provider_name}'. Using OpenAI.")
+            return ChatOpenAI(**kwargs)
 
 
 class ResearchPlanner:

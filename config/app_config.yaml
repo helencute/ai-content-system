@@ -1,0 +1,35 @@
+content_generators:
+  default_brand_profile: tech_blog
+  max_content_length:
+    blog: 2000
+    report: 5000
+    thread: 280
+data_analyzer:
+  color_palette: blues
+  default_chart_type: bar
+  max_items_per_chart: 10
+publishing:
+  auto_publish: false
+  platforms:
+    threads:
+      enabled: true
+    wordpress:
+      api_endpoint: https://your-site.com/wp-json/wp/v2
+      enabled: true
+  review_required: true
+research_planner:
+  llm_params:
+    model: gpt-4o
+    temperature: 0.2
+  llm_provider: openai
+  max_retries: 2
+source_collector:
+  apis:
+    news_api:
+      enabled: true
+      priority: 1
+    scholar_api:
+      enabled: true
+      priority: 2
+  credibility_threshold: 0.7
+  max_sources: 10
