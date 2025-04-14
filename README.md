@@ -94,8 +94,24 @@ ai-content-system/
 
 You don't need to write code that installs packages programmatically within your application - this is handled externally through pip or your containerization process.
 
-# Test the research planner with a specific topic
+## Dependency Management
+
+This project follows these forward-looking dependency principles:
+
+1. **Latest Versions First**: We use the latest stable versions of core dependencies
+2. **No Downgrades**: We find alternatives rather than downgrade dependencies
+3. **Isolation**: All dependencies are managed in a dedicated virtual environment
+
+## Handling Anaconda Conflicts
+
+If you're using Anaconda, you may see dependency warnings from packages like:
+- anaconda-cloud-auth (requiring older pydantic)
+- spyder, numba, scipy (requiring older numpy)
+
+These warnings can be safely ignored when using a dedicated virtual environment, as they refer to global Anaconda packages not used by this project.
+
+## Test the research planner with a specific topic
 python scripts/test_research_planner.py --topic "Impact of climate change on global food security"
 
-# Run unit tests
+## Run unit tests
 python -m pytest tests/unit/test_research_planner.py -v
